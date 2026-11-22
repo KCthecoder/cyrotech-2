@@ -13,6 +13,8 @@ message and a password and watch each stage happen live in the browser:
    is checked against Web Crypto's ciphertext.
 6. **Package.** salt | IV | ciphertext | tag, colour-coded, then base64.
 7. **Try to break it.** Wrong password or a single flipped bit makes decryption refuse.
+8. **Compare with Caesar.** Your message through a Caesar cipher next to AES: repeated letters stay
+   visible in Caesar but not in AES, and "Crack it" tries all 25 shifts in about a millisecond.
 
 All encryption uses the browser's built-in Web Crypto API. Step 5 re-runs one block in a small
 JavaScript AES (`aes-viz.js`) only to show the rounds Web Crypto keeps hidden; it is tested against
@@ -41,9 +43,10 @@ only allow Web Crypto on `https://` or `localhost`.
 node --test tests/
 ```
 
-16 tests cover the round trip, wrong-password and tamper rejection, UTF-8 sizes,
+21 tests cover the round trip, wrong-password and tamper rejection, UTF-8 sizes,
 fresh output per message, IV-reuse behaviour, packing, the FIPS-197 AES-128 and AES-256
-known answers, agreement with Web Crypto, and the GCM keystream.
+known answers, agreement with Web Crypto, the GCM keystream, and the Caesar cipher and its
+brute-force crack.
 
 ## Files
 
@@ -53,10 +56,11 @@ known answers, agreement with Web Crypto, and the GCM keystream.
 | `app.js` | Drives the page and draws the byte grids. |
 | `aes-viz.js` | Readable AES block cipher that records every round (teaching only). |
 | `rounds.js` | Step 5: the round-by-round animation and the Web Crypto check. |
+| `caesar.js` | Caesar cipher, English scoring and brute-force crack. |
+| `caesar-ui.js` | Step 8: the Caesar vs AES comparison. |
 | `index.html`, `style.css` | Page and styling (light and dark). |
-| `tests/` | Node tests for `cipher.js` and `aes-viz.js`. |
+| `tests/` | Node tests for `cipher.js`, `aes-viz.js` and `caesar.js`. |
 
-## Ideas for next steps
+## Status
 
-- Show the GCM tag calculation (GHASH) the same way.
-- Compare with a weak scheme (e.g. a Caesar cipher) to show why patterns leak.
+Complete (2026-11-22). The GCM tag calculation (GHASH) was considered and left out of scope.

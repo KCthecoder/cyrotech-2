@@ -165,6 +165,31 @@
         </div>
         <div class="result" id="lab-result" aria-live="polite"></div>
       </li>
+
+      <li class="step" id="step-caesar">
+        <div class="step-head"><span class="num">8</span><h2>Compare: a 2,000-year-old cipher</h2></div>
+        <p class="explain">Julius Caesar hid messages by moving every letter a fixed number of places along the alphabet. Here is your message through his cipher, next to AES. Look for what gives it away.</p>
+
+        <div class="row">
+          <label class="inline" for="caesar-shift">Shift</label>
+          <input type="range" id="caesar-shift" min="1" max="25" value="3" class="caesar-slider">
+          <span class="caesar-shift-value" id="caesar-shift-value">3</span>
+        </div>
+        <p class="caesar-map" id="caesar-map" aria-label="Letter mapping"></p>
+
+        <div class="caesar-grid" id="caesar-grid"></div>
+        <p class="legend caesar-legend">
+          <span><b>Top:</b> your text</span>
+          <span><b>Middle:</b> Caesar</span>
+          <span><b>Bottom:</b> AES (first byte of each character)</span>
+        </p>
+        <p class="callout" id="caesar-leak"></p>
+
+        <div class="actions">
+          <button type="button" class="btn" id="caesar-crack">Crack it: try all 25 shifts</button>
+        </div>
+        <div class="caesar-crack" id="caesar-result" aria-live="polite"></div>
+      </li>
     </ol>
   </main>
 
@@ -176,5 +201,7 @@
   <script src="aes-viz.js"></script>
   <script src="app.js"></script>
   <script src="rounds.js"></script>
+  <script src="caesar.js"></script>
+  <script src="caesar-ui.js"></script>
 </body>
 </html>
