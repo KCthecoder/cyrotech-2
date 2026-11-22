@@ -95,8 +95,43 @@
         <p class="callout" id="reuse-note" hidden></p>
       </li>
 
+      <li class="step" id="step-rounds">
+        <div class="step-head"><span class="num">5</span><h2>Inside AES: 14 rounds</h2></div>
+        <p class="explain">GCM doesn't feed your text into AES directly. It encrypts a <b class="t-iv">counter block</b> (your IV plus a 4-byte counter), and the output, called the <b class="t-ct">keystream</b>, is combined with your bytes. Here is that block going through all 14 rounds, using your real key. Web Crypto hides these steps, so this step re-runs them in plain JavaScript and checks the result matches.</p>
+
+        <div class="aes-controls" role="group" aria-label="AES round controls">
+          <button type="button" class="btn ghost icon" id="aes-first" aria-label="First step"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3h2v10H3zM13 3v10L6 8z"/></svg></button>
+          <button type="button" class="btn ghost icon" id="aes-prev" aria-label="Previous step"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M11 3v10L4 8z"/></svg></button>
+          <button type="button" class="btn icon wide" id="aes-play" aria-label="Play">▶ Play</button>
+          <button type="button" class="btn ghost icon" id="aes-next" aria-label="Next step"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10l7-5z"/></svg></button>
+          <button type="button" class="btn ghost icon" id="aes-last" aria-label="Last step"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3v10l7-5zM11 3h2v10h-2z"/></svg></button>
+          <input type="range" id="aes-slider" min="0" max="56" value="0" aria-label="AES step">
+        </div>
+
+        <div class="aes-progress" id="aes-progress" aria-hidden="true"></div>
+        <p class="aes-where" id="aes-where" aria-live="polite"></p>
+
+        <div class="aes-stage">
+          <figure class="grid-fig">
+            <figcaption>Before</figcaption>
+            <div class="grid4" id="aes-before"></div>
+          </figure>
+          <div class="aes-op" id="aes-op">
+            <span class="op-name" id="aes-op-name"></span>
+            <div class="grid4 small" id="aes-key" hidden></div>
+            <span class="op-sub" id="aes-key-label"></span>
+          </div>
+          <figure class="grid-fig">
+            <figcaption>After <small>(changed bytes highlighted)</small></figcaption>
+            <div class="grid4" id="aes-after"></div>
+          </figure>
+        </div>
+        <p class="explain aes-explain" id="aes-explain"></p>
+        <p class="callout" id="aes-check"></p>
+      </li>
+
       <li class="step" id="step-package">
-        <div class="step-head"><span class="num">5</span><h2>Packed into text you can share</h2></div>
+        <div class="step-head"><span class="num">6</span><h2>Packed into text you can share</h2></div>
         <p class="explain">The receiver needs the salt and IV too. They aren't secret, so they're stored in front of the ciphertext. Base64 then turns the bytes into ordinary letters that survive email and chat.</p>
         <div class="cells packed" id="packed"></div>
         <div class="b64-wrap">
@@ -112,7 +147,7 @@
       </li>
 
       <li class="step" id="step-lab">
-        <div class="step-head"><span class="num">6</span><h2>Try to break it</h2></div>
+        <div class="step-head"><span class="num">7</span><h2>Try to break it</h2></div>
         <p class="explain">Decryption runs everything backwards. Use a wrong password or change a single bit, and the tag check fails, so nothing is revealed.</p>
         <label class="field">
           <span>Encrypted text</span>
@@ -138,6 +173,8 @@
   </footer>
 
   <script src="cipher.js"></script>
+  <script src="aes-viz.js"></script>
   <script src="app.js"></script>
+  <script src="rounds.js"></script>
 </body>
 </html>

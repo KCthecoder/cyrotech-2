@@ -162,6 +162,8 @@
     }
 
     state.last = { message, password, salt: state.salt, iv: state.iv, iterations: state.iterations, keyBytes, ct, tag, b64 };
+    // Step 5 (rounds.js) re-runs one AES block with the same key and IV.
+    document.dispatchEvent(new CustomEvent("cyro:sealed", { detail: { keyBytes, iv: state.iv, plaintext, sealed } }));
     $("status").textContent = `Encrypted ${fmt(plaintext.length)} bytes into ${fmt(b64.length)} characters.`;
   }
 

@@ -49,6 +49,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -160,6 +161,69 @@ textarea:focus, input:focus, select:focus, .btn:focus-visible { outline: 2px sol
 .result strong { display: block; margin-bottom: 2px; }
 .result .msg { font-family: var(--mono); color: var(--ink); }
 
+/* ---------- step 5: AES rounds ---------- */
+.aes-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.btn.icon { padding: 9px 11px; min-width: 40px; display: inline-grid; place-items: center; }
+.btn.icon svg { width: 14px; height: 14px; fill: currentColor; }
+.btn.wide { min-width: 96px; }
+.aes-controls input[type="range"] { flex: 1 1 200px; padding: 0; border: 0; background: none; accent-color: var(--accent); }
+
+.aes-progress { display: grid; grid-template-columns: repeat(15, 1fr); gap: 3px; }
+.aes-progress span {
+  font: 10px/1 var(--mono); text-align: center; color: var(--muted);
+  padding: 5px 0 4px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line);
+  overflow: hidden; text-overflow: clip; white-space: nowrap;
+}
+.aes-progress span.done { background: color-mix(in srgb, var(--accent) 22%, var(--panel)); color: var(--ink); border-color: transparent; }
+.aes-progress span.now { background: var(--accent); color: var(--panel); border-color: var(--accent); font-weight: 700; }
+.aes-where { margin: 0; font: 600 14px/1.3 var(--mono); }
+
+.aes-stage { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+.grid-fig { margin: 0; display: grid; gap: 6px; justify-items: center; }
+.grid-fig figcaption { font-size: 13px; font-weight: 600; color: var(--muted); }
+.grid-fig figcaption small { font-weight: 400; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 46px); gap: 5px; overflow: hidden; padding: 2px; }
+.grid4 .g {
+  --c: var(--plain);
+  height: 40px; display: grid; place-items: center; border-radius: 6px;
+  font: 600 15px/1 var(--mono); color: var(--c); background: var(--cell-bg);
+  border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+  transition: transform .55s cubic-bezier(.2,.7,.2,1), background-color .3s;
+}
+.grid4 .g.iv { --c: var(--iv); }
+.grid4 .g.ctr { --c: var(--salt); }
+.grid4 .g.rk { --c: var(--key); }
+.grid4 .g.ks { --c: var(--ct); }
+.grid4 .g.changed { background: var(--changed); color: var(--ink); }
+.grid4.small { grid-template-columns: repeat(4, 30px); gap: 3px; }
+.grid4.small .g { height: 26px; font-size: 11px; border-radius: 4px; }
+
+.aes-op { display: grid; justify-items: center; gap: 6px; min-width: 110px; }
+.op-name { font: 700 14px/1.2 var(--mono); color: var(--accent); text-align: center; }
+.op-sub { font: 12px/1.2 var(--mono); color: var(--key); }
+.aes-explain { min-height: 4.6em; }
+.check-ok { border-left-color: var(--ok); background: color-mix(in srgb, var(--ok) 9%, var(--panel)); }
+.check-bad { border-left-color: var(--bad); background: color-mix(in srgb, var(--bad) 9%, var(--panel)); }
+.callout strong { margin-right: 4px; }
+
+@keyframes flip { 0% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+@keyframes colpulse { 0% { transform: scale(.82); filter: brightness(1.25); } 100% { transform: scale(1); } }
+@keyframes xorfade { 0% { opacity: .15; } 100% { opacity: 1; } }
+.g.a-flip { animation: flip .45s ease-out both; }
+.g.a-col { animation: colpulse .45s ease-out both; }
+.g.a-xor { animation: xorfade .5s ease-out both; }
+
+@media (max-width: 640px) {
+  .aes-stage { grid-template-columns: 1fr; justify-items: center; }
+  .aes-op { min-width: 0; }
+  .grid4 { grid-template-columns: repeat(4, 42px); }
+  .aes-progress { grid-template-columns: repeat(8, 1fr); }
+}
+
 footer { padding-bottom: 48px; color: var(--muted); font-size: 13px; }
 
-@media (prefers-reduced-motion: reduce) { .cell { transition: none; } .cell.changed { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .cell, .grid4 .g { transition: none; }
+  .cell.changed { transform: none; }
+  .g.a-flip, .g.a-col, .g.a-xor { animation: none; }
+}
