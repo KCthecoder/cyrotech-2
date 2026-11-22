@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CyroTech — See Encryption</title>
+  <meta name="description" content="Type a message and a password and watch each stage of real AES-256-GCM encryption happen in your browser.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">CyroTech</p>
+    <h1>Watch your message get encrypted</h1>
+    <p class="lede">Real AES-256-GCM, running in your browser with the Web Crypto API. Nothing you type leaves this page.</p>
+  </header>
+
+  <main>
+    <section class="inputs" aria-label="Your message and password">
+      <label class="field">
+        <span>Message</span>
+        <textarea id="message" rows="2" maxlength="160" spellcheck="false">Meet me at 6 👋</textarea>
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input id="password" type="text" value="correct horse" autocomplete="off" spellcheck="false">
+      </label>
+      <p class="status" id="status" aria-live="polite"></p>
+    </section>
+
+    <ol class="pipeline">
+      <li class="step" id="step-bytes">
+        <div class="step-head"><span class="num">1</span><h2>Text becomes bytes</h2></div>
+        <p class="explain">Computers encrypt numbers, not letters. UTF-8 turns each character into 1–4 bytes (numbers from 0 to 255, shown here in hexadecimal). Plain English letters take 1 byte; accents take 2; emoji take 4.</p>
+        <p class="meta" id="bytes-meta"></p>
+        <div class="chars" id="chars"></div>
+      </li>
+
+      <li class="step" id="step-key">
+        <div class="step-head"><span class="num">2</span><h2>Password becomes a key</h2></div>
+        <p class="explain">AES needs exactly 32 random-looking bytes, not a password. PBKDF2 mixes your password with a random <b class="t-salt">salt</b> and repeats a hash many times. The repetition makes every password guess slow for an attacker.</p>
+        <div class="row">
+          <div class="cellgroup">
+            <h3><span class="swatch s-salt"></span>Salt <small>16 random bytes, stored with the message</small></h3>
+            <div class="cells" id="salt"></div>
+          </div>
+          <button type="button" class="btn ghost" id="new-salt">New salt</button>
+        </div>
+        <div class="row">
+          <label class="inline">Rounds
+            <select id="iterations">
+              <option value="1000">1,000</option>
+              <option value="10000">10,000</option>
+              <option value="100000">100,000</option>
+              <option value="600000" selected>600,000 (recommended)</option>
+              <option value="2000000">2,000,000</option>
+            </select>
+          </label>
+          <p class="meta" id="kdf-time"></p>
+        </div>
+        <div class="cellgroup">
+          <h3><span class="swatch s-key"></span>Key <small>32 bytes = 256 bits</small></h3>
+          <div class="cells" id="key"></div>
+        </div>
+        <p class="callout" id="key-note" hidden></p>
+      </li>
+
+      <li class="step" id="step-iv">
+        <div class="step-head"><span class="num">3</span><h2>A fresh starting point</h2></div>
+        <p class="explain">The <b class="t-iv">IV</b> (initialisation vector) is 12 random bytes picked for every message. It makes the same message encrypt differently each time, so the key must never be used twice with the same IV.</p>
+        <div class="row">
+          <div class="cellgroup">
+            <h3><span class="swatch s-iv"></span>IV <small>12 random bytes</small></h3>
+            <div class="cells" id="iv"></div>
+          </div>
+          <button type="button" class="btn ghost" id="new-iv">New IV</button>
+        </div>
+      </li>
+
+      <li class="step" id="step-encrypt">
+        <div class="step-head"><span class="num">4</span><h2>AES scrambles the bytes</h2></div>
+        <p class="explain">AES-GCM produces a stream of random-looking bytes from the key and IV and combines it with your message byte by byte. The <b class="t-ct">ciphertext</b> is the same length as your message. GCM also adds a 16-byte <b class="t-tag">tag</b>, a fingerprint that exposes any change.</p>
+        <div class="cellgroup">
+          <h3><span class="swatch s-plain"></span>Your bytes</h3>
+          <div class="cells" id="plain"></div>
+        </div>
+        <div class="arrow" aria-hidden="true">↓ AES-256-GCM</div>
+        <div class="cellgroup">
+          <h3><span class="swatch s-ct"></span>Ciphertext <small id="ct-changed"></small></h3>
+          <div class="cells" id="ct"></div>
+        </div>
+        <div class="cellgroup">
+          <h3><span class="swatch s-tag"></span>Tag <small>16 bytes</small></h3>
+          <div class="cells" id="tag"></div>
+        </div>
+        <p class="callout" id="reuse-note" hidden></p>
+      </li>
+
+      <li class="step" id="step-package">
+        <div class="step-head"><span class="num">5</span><h2>Packed into text you can share</h2></div>
+        <p class="explain">The receiver needs the salt and IV too. They aren't secret, so they're stored in front of the ciphertext. Base64 then turns the bytes into ordinary letters that survive email and chat.</p>
+        <div class="cells packed" id="packed"></div>
+        <div class="b64-wrap">
+          <code class="b64" id="b64"></code>
+          <button type="button" class="btn" id="copy">Copy</button>
+        </div>
+        <p class="legend">
+          <span><span class="swatch s-salt"></span>salt</span>
+          <span><span class="swatch s-iv"></span>IV</span>
+          <span><span class="swatch s-ct"></span>ciphertext</span>
+          <span><span class="swatch s-tag"></span>tag</span>
+        </p>
+      </li>
+
+      <li class="step" id="step-lab">
+        <div class="step-head"><span class="num">6</span><h2>Try to break it</h2></div>
+        <p class="explain">Decryption runs everything backwards. Use a wrong password or change a single bit, and the tag check fails, so nothing is revealed.</p>
+        <label class="field">
+          <span>Encrypted text</span>
+          <textarea id="lab-input" rows="3" spellcheck="false"></textarea>
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input id="lab-password" type="text" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="actions">
+          <button type="button" class="btn" id="lab-decrypt">Decrypt</button>
+          <button type="button" class="btn ghost" id="lab-flip">Flip one bit</button>
+          <button type="button" class="btn ghost" id="lab-wrong">Wrong password</button>
+          <button type="button" class="btn ghost" id="lab-reset">Reset</button>
+        </div>
+        <div class="result" id="lab-result" aria-live="polite"></div>
+      </li>
+    </ol>
+  </main>
+
+  <footer>
+    <p>CyroTech 2 · Built with the browser's Web Crypto API · No data is sent anywhere.</p>
+  </footer>
+
+  <script src="cipher.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
